@@ -9,7 +9,7 @@ interface EditQuestionUseCaseRequest {
 }
 
 interface EditQuestionUseCaseResponse {
-  question?: Question
+  question: Question
 }
 
 export class EditQuestionUseCase {
@@ -36,6 +36,8 @@ export class EditQuestionUseCase {
 
     await this.questionRepository.save(question)
 
-    return {}
+    return {
+      question,
+    }
   }
 }
