@@ -25,14 +25,15 @@ describe('Delete answer comment', () => {
     expect(inMemoryAnswerCommentsRepository.items).toHaveLength(0)
   })
 
-  test('it should not be able to delete a answer comment', async () => {
-    const newAnswerComment = makeAnswerComment({
+  it('should not be able to delete another user answer comment', async () => {
+    const answerComment = makeAnswerComment({
       authorId: new UniqueEntityId('author-1'),
     })
-    await inMemoryAnswerCommentsRepository.create(newAnswerComment)
+
+    await inMemoryAnswerCommentsRepository.create(answerComment)
 
     const result = await sut.execute({
-      answerCommentId: newAnswerComment.id.toString(),
+      answerCommentId: answerComment.id.toString(),
       authorId: 'author-2',
     })
 

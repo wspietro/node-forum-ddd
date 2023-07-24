@@ -27,7 +27,7 @@ export class DeleteQuestionUseCase {
     }
 
     if (authorId !== question.authorId.toString()) {
-      return right(new NotAllowedError())
+      return left(new NotAllowedError())
     }
 
     await this.questionRepository.delete(question)

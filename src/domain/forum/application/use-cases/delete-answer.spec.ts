@@ -1,16 +1,17 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository'
-import { DeleteAnswerUserCase } from './delete-answer'
+import { DeleteAnswerUseCase } from './delete-answer'
 import { makeAnswer } from 'test/factories/make-answer'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 // Automatizando processo de criacao do repositorio e do use-case
 let inMemoryAswersRepository: InMemoryAnswersRepository
-let sut: DeleteAnswerUserCase
+let sut: DeleteAnswerUseCase
 
 describe('Delete Answer', () => {
   beforeEach(async () => {
     inMemoryAswersRepository = new InMemoryAnswersRepository()
-    sut = new DeleteAnswerUserCase(inMemoryAswersRepository)
+    sut = new DeleteAnswerUseCase(inMemoryAswersRepository)
   })
 
   test('it should be able to delete a Answer', async () => {
@@ -31,7 +32,7 @@ describe('Delete Answer', () => {
     expect(inMemoryAswersRepository.items).toHaveLength(0)
   })
 
-  test('it should not be able to delete a Answer from another user', async () => {
+  it('should not be able to delete a answer from another user', async () => {
     const newAnswer = makeAnswer(
       {
         authorId: new UniqueEntityId('author-1'),
@@ -41,13 +42,12 @@ describe('Delete Answer', () => {
 
     await inMemoryAswersRepository.create(newAnswer)
 
-    expect(() => {
-      return sut.execute({
-        authorId: 'author-2',
-        answerId: 'answer-1',
-      })
-    }).rejects.toBeInstanceOf(Error)
+    const result = await sut.execute({
+      answerId: 'answer-1',
+      authorId: 'author-2',
+    })
 
-    expect(inMemoryAswersRepository.items).toHaveLength(1)
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })
